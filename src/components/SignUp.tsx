@@ -25,7 +25,7 @@ const Auth = () => {
       } else {
         console.log((await supabase.auth.getUser()).data);
         if (isDoctor) {
-          router.push('/upload');
+          router.push('/doctor/dashboard');
         }
       }
     } else {
@@ -50,7 +50,7 @@ const Auth = () => {
               console.error("Database insert error:", dbError);
             } else {
               console.log("Doctor details inserted into database");
-              router.push('/upload');
+              router.push('/doctor/dashboard');
             }
           } else {
             const { error: dbError } = await supabase.from('patients').insert({

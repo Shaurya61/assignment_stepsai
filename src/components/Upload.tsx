@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import { supabase } from "../../../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseClient";
 import { useRouter } from 'next/navigation';
-import withAuth from "../../../lib/auth";
+import withAuth from "../../lib/auth";
 
 const Upload = () => {
   const router = useRouter();
@@ -14,7 +14,6 @@ const Upload = () => {
       return;
     }
 
-    // Get authenticated user
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData?.user) {
       console.error("User error:", userError);
@@ -24,7 +23,6 @@ const Upload = () => {
     const user = userData.user;
     console.log("Authenticated user:", user);
 
-    // Query the doctors table to get the doctor_id
     const { data: doctorData, error: doctorError } = await supabase
       .from('doctors')
       .select('doctor_id')
@@ -38,7 +36,6 @@ const Upload = () => {
     const doctor_id = doctorData[0].doctor_id;
     console.log("Doctor ID:", doctor_id);
 
-    // Upload file to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from("pdfs")
       .upload(`pdfs/${doctor_id}/${file.name}`, file);
@@ -48,7 +45,6 @@ const Upload = () => {
     }
     console.log("File uploaded:", uploadData);
 
-    // Insert file details into database
     const { error: dbError } = await supabase.from("pdfs").insert({
       doctor_id: doctor_id,
       filepath: uploadData?.path,
@@ -69,33 +65,31 @@ const Upload = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8">
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-center text-2xl font-extrabold text-gray-900">
+          Upload PDF
+        </h2>
+      </div>
+      <div className="space-y-6 text-black">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Upload PDF
-          </h2>
+          <input
+            type="file"
+            onChange={(e) =>
+              setFile(e.target.files ? e.target.files[0] : null)
+            }
+          />
         </div>
-        <div className="mt-8 space-y-6">
-          <div>
-            <input
-              type="file"
-              onChange={(e) =>
-                setFile(e.target.files ? e.target.files[0] : null)
-              }
-            />
-          </div>
-          <div>
-            <button
-              onClick={handleUpload}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-            >
-              Upload
-            </button>
-            <button onClick={handleSignout} className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
-              Signout
-            </button>
-          </div>
+        <div>
+          <button
+            onClick={handleUpload}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            Upload
+          </button>
+          <button onClick={handleSignout} className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+            Signout
+          </button>
         </div>
       </div>
     </div>
