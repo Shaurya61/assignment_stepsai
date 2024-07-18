@@ -19,54 +19,89 @@ const Auth = () => {
 
   const handleAuth = async () => {
     if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        console.error(error);
-      } else {
-        console.log((await supabase.auth.getUser()).data);
-        if (isDoctor) {
-          router.push('/doctor/dashboard');
+      try {
+        // Check if the user is a doctor based on the email
+        const { data: doctorData, error: doctorError } = await supabase
+          .from('doctors')
+          .select('uid')
+          .eq('email', email);
+
+        if (doctorError) {
+          console.error('Error checking doctor:', doctorError);
         }
+
+        // Check if the user is a patient based on the email
+        const { data: patientData, error: patientError } = await supabase
+          .from('patients')
+          .select('uid')
+          .eq('email', email);
+
+        if (patientError) {
+          console.error('Error checking patient:', patientError);
+        }
+
+        if ((doctorData && doctorData.length > 0) || (patientData && patientData.length > 0)) {
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError) {
+            console.error(signInError);
+          } else {
+            console.log((await supabase.auth.getUser()).data);
+            if (doctorData && doctorData.length > 0) {
+              router.push('/doctor/dashboard');
+            } else {
+              router.push('/patient/dashboard');
+            }
+          }
+        } else {
+          console.error('User not found in either doctor or patient tables.');
+        }
+      } catch (error) {
+        console.error('Unexpected error:', error);
       }
     } else {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
-      if (signUpError) {
-        console.error(signUpError);
-      } else {
-        const user = signUpData.user;
-        if (user) {
-          const passwordHash = await bcrypt.hash(password, 10);
+      try {
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
+        if (signUpError) {
+          console.error(signUpError);
+        } else {
+          const user = signUpData.user;
+          if (user) {
+            const passwordHash = await bcrypt.hash(password, 10);
 
-          if (isDoctor) {
-            const { error: dbError } = await supabase.from('doctors').insert({
-              doctorid: user.id,
-              name,
-              email,
-              passwordhash: passwordHash,
-              specialty,
-            });
+            if (isDoctor) {
+              const { error: dbError } = await supabase.from('doctors').insert({
+                uid: user.id,
+                name,
+                email,
+                passwordhash: passwordHash,
+                specialty,
+              });
 
-            if (dbError) {
-              console.error("Database insert error:", dbError);
+              if (dbError) {
+                console.error("Database insert error:", dbError);
+              } else {
+                console.log("Doctor details inserted into database");
+                router.push('/doctor/dashboard');
+              }
             } else {
-              console.log("Doctor details inserted into database");
-              router.push('/doctor/dashboard');
-            }
-          } else {
-            const { error: dbError } = await supabase.from('patients').insert({
-              patientid: user.id,
-              name,
-              email,
-              passwordhash: passwordHash,
-            });
+              const { error: dbError } = await supabase.from('patients').insert({
+                uid: user.id,
+                name,
+                email,
+                passwordhash: passwordHash,
+              });
 
-            if (dbError) {
-              console.error("Database insert error:", dbError);
-            } else {
-              console.log("Patient details inserted into database");
+              if (dbError) {
+                console.error("Database insert error:", dbError);
+              } else {
+                console.log("Patient details inserted into database");
+                router.push('/patient/dashboard');
+              }
             }
           }
         }
+      } catch (error) {
+        console.error('Unexpected error:', error);
       }
     }
   };

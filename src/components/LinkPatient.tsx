@@ -143,7 +143,7 @@ const LinkPatient = () => {
         )}
         {linkedPatients.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-xl font-semibold">Linked Patients:</h3>
+            <h3 className="text-xl font-semibold text-black">Linked Patients:</h3>
             <ul className="list-disc list-inside mt-4 text-black">
               {linkedPatients.map((patient) => (
                 <li key={patient.patient_id}>{patient.name}</li>

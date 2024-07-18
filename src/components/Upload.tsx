@@ -60,7 +60,7 @@ const Upload = () => {
 
   const handleSignout = async () => {
     const { error } = await supabase.auth.signOut();
-    router.push('/auth');
+    router.push('/');
     if (error) console.error("Signout error:", error);
   };
 
