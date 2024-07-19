@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from 'next/navigation';
-import withAuth from "../../lib/auth";
+import withAuth from "@/lib/auth";
 
 const Upload = () => {
   const router = useRouter();
@@ -58,11 +58,7 @@ const Upload = () => {
     }
   };
 
-  const handleSignout = async () => {
-    const { error } = await supabase.auth.signOut();
-    router.push('/');
-    if (error) console.error("Signout error:", error);
-  };
+
 
   return (
     <div className="space-y-8">
@@ -87,13 +83,11 @@ const Upload = () => {
           >
             Upload
           </button>
-          <button onClick={handleSignout} className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
-            Signout
-          </button>
+
         </div>
       </div>
     </div>
   );
 };
 
-export default withAuth(Upload);
+export default withAuth(Upload, 'doctor');

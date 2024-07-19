@@ -1,11 +1,11 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../lib/supabaseClient'; 
+import { supabase } from '@/lib/supabaseClient';
 import bcrypt from 'bcryptjs';
 import { Label } from "@/components/label";
 import { Input } from "@/components/input";
-import { cn } from "../../lib/utils";
+import { cn } from '@/lib/utils';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -20,6 +20,8 @@ const Auth = () => {
   const handleAuth = async () => {
     if (isLogin) {
       try {
+        console.log('Attempting login for:', email);
+
         // Check if the user is a doctor based on the email
         const { data: doctorData, error: doctorError } = await supabase
           .from('doctors')
@@ -43,12 +45,14 @@ const Auth = () => {
         if ((doctorData && doctorData.length > 0) || (patientData && patientData.length > 0)) {
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
           if (signInError) {
-            console.error(signInError);
+            console.error('Error signing in:', signInError);
           } else {
-            console.log((await supabase.auth.getUser()).data);
+            console.log('Successfully signed in:', signInData);
             if (doctorData && doctorData.length > 0) {
+              console.log('Redirecting to doctor dashboard');
               router.push('/doctor/dashboard');
             } else {
+              console.log('Redirecting to patient dashboard');
               router.push('/patient/dashboard');
             }
           }
@@ -56,13 +60,15 @@ const Auth = () => {
           console.error('User not found in either doctor or patient tables.');
         }
       } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error('Unexpected error during login:', error);
       }
     } else {
       try {
+        console.log('Attempting sign-up for:', email);
+
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
         if (signUpError) {
-          console.error(signUpError);
+          console.error('Error signing up:', signUpError);
         } else {
           const user = signUpData.user;
           if (user) {
@@ -81,6 +87,7 @@ const Auth = () => {
                 console.error("Database insert error:", dbError);
               } else {
                 console.log("Doctor details inserted into database");
+                console.log('Redirecting to doctor dashboard');
                 router.push('/doctor/dashboard');
               }
             } else {
@@ -95,17 +102,17 @@ const Auth = () => {
                 console.error("Database insert error:", dbError);
               } else {
                 console.log("Patient details inserted into database");
+                console.log('Redirecting to patient dashboard');
                 router.push('/patient/dashboard');
               }
             }
           }
         }
       } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error('Unexpected error during sign-up:', error);
       }
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">

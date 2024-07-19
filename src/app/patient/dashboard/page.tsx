@@ -1,9 +1,9 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { supabase } from "../../../../lib/supabaseClient";
-import withAuth from "../../../../lib/auth";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+"use client"; // Directive to use client-side JavaScript only
+import React, { useEffect, useState } from "react"; // Importing React and hooks for side effects and state management
+import { supabase } from "@/lib/supabaseClient"; // Importing supabase client instance for database interactions
+import withAuth from "@/lib/auth"; // Importing HOC for authentication
+import Link from "next/link"; // Importing Link component from Next.js for client-side navigation
+import { useRouter } from "next/navigation"; // Importing useRouter for navigation
 
 // Define a type for the doctor
 interface Doctor {
@@ -14,65 +14,68 @@ interface Doctor {
 }
 
 const PatientDashboard = () => {
-  const router = useRouter();
-  const [linkedDoctors, setLinkedDoctors] = useState<Doctor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [patientName, setPatientName] = useState("");
+  const router = useRouter(); // Hook to programmatically navigate
+  const [linkedDoctors, setLinkedDoctors] = useState<Doctor[]>([]); // State to store linked doctors
+  const [loading, setLoading] = useState(true); // State to manage loading status
+  const [patientName, setPatientName] = useState(""); // State to store patient name
 
   useEffect(() => {
+    // Function to fetch linked doctors from the database
     const fetchLinkedDoctors = async () => {
-      const user = (await supabase.auth.getUser()).data.user;
-
+      const user = (await supabase.auth.getUser()).data.user; // Getting the current user
       if (user) {
+        // Fetching the patient name
         const { data: patientData } = await supabase
           .from("patients")
           .select("name")
           .eq("uid", user.id)
           .single();
-        setPatientName(patientData?.name || "");
+        setPatientName(patientData?.name || ""); // Setting the patient name
 
+        // Fetching the linked doctors for the patient
         const { data: doctorPatientData } = await supabase
           .from("doctorpatient")
-          .select("doctor_id")
+          .select("doctor_id");
 
         if (doctorPatientData) {
-          const doctorIds = doctorPatientData.map((link) => link.doctor_id);
+          const doctorIds = doctorPatientData.map((link) => link.doctor_id); // Extracting doctor IDs
           const { data: doctorData } = await supabase
             .from("doctors")
             .select("*")
-            .in("doctor_id", doctorIds);
-          setLinkedDoctors(doctorData || []);
+            .in("doctor_id", doctorIds); // Fetching doctor details
+          setLinkedDoctors(doctorData || []); // Setting the state with doctors data
         }
       }
-      setLoading(false);
+      setLoading(false); // Setting loading state to false once data is fetched
     };
 
-    fetchLinkedDoctors();
+    fetchLinkedDoctors(); // Calling the function to fetch linked doctors
   }, []);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <p>Loading...</p>; // Display loading text while data is being fetched
   }
 
+  // Function to handle signout
   const handleSignout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
+    await supabase.auth.signOut(); // Signing out the user
+    router.push("/"); // Redirecting to the home page
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 text-black">
-      <header className="bg-indigo-600 text-white shadow-md py-4">
-        <nav className="container mx-auto flex justify-between items-center px-6">
-          <div className="text-xl font-bold">Patient Dashboard</div>
-          <ul className="flex space-x-6">
+    <main className="min-h-screen bg-gray-100 text-black"> {/* Main container with minimum height and background color */}
+      <header className="bg-indigo-600 text-white shadow-md py-4"> {/* Header with background color, text color, shadow, and padding */}
+        <nav className="container mx-auto flex justify-between items-center px-6"> {/* Navigation container with flex layout and spacing */}
+          <div className="text-xl font-bold">Patient Dashboard</div> {/* Title of the dashboard */}
+          <ul className="flex space-x-6"> {/* Navigation links with spacing */}
             <li>
-              <Link href="/patient/dashboard">
-                <span className="hover:text-gray-300">Dashboard</span>
+              <Link href="/patient/dashboard"> {/* Link to patient dashboard */}
+                <span className="hover:text-gray-300">Dashboard</span> {/* Text with hover effect */}
               </Link>
             </li>
             <li>
-              <Link href="/patient/dashboard">
-                <button className="hover:text-gray-300" onClick={handleSignout}>
+              <Link href="/patient/dashboard"> {/* Link to patient dashboard */}
+                <button className="hover:text-gray-300" onClick={handleSignout}> {/* Button for signout */}
                   Signout
                 </button>
               </Link>
@@ -80,29 +83,27 @@ const PatientDashboard = () => {
           </ul>
         </nav>
       </header>
-      <section className="container mx-auto py-10 px-6">
-        <h1 className="text-3xl font-bold mb-6">
-          Welcome {patientName}, to your dashboard
-        </h1>
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">Your Linked Doctors</h2>
+      <section className="container mx-auto py-10 px-6"> {/* Section with padding */}
+        <h1 className="text-3xl font-bold mb-6">Welcome {patientName}, to your dashboard</h1> {/* Greeting message with patient name */}
+        <div className="bg-white p-6 rounded-lg shadow-md"> {/* Container for linked doctors */}
+          <h2 className="text-2xl font-bold mb-4">Your Linked Doctors</h2> {/* Heading for linked doctors */}
           {linkedDoctors.length > 0 ? (
-            <ul className="space-y-4">
+            <ul className="space-y-4"> {/* List of linked doctors */}
               {linkedDoctors.map((doctor) => (
                 <li
                   key={doctor.doctor_id}
-                  className="p-4 border border-gray-300 rounded-md hover:bg-gray-50 flex justify-between items-center"
-                >
+                  className="p-4 border border-gray-300 rounded-md hover:bg-gray-50 flex justify-between items-center"> {/* List item styling */}
+                
                   <div>
-                    <div className="font-medium text-lg">{doctor.name}</div>
-                    <div className="text-gray-600">{doctor.email}</div>
-                    <div className="text-gray-600">{doctor.specialty}</div>
+                    <div className="font-medium text-lg">{doctor.name}</div> {/* Doctor's name */}
+                    <div className="text-gray-600">{doctor.email}</div> {/* Doctor's email */}
+                    <div className="text-gray-600">{doctor.specialty}</div> {/* Doctor's specialty */}
                   </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No linked doctors found.</p>
+            <p>No linked doctors found.</p>  /* Message when no linked doctors are found */
           )}
         </div>
       </section>
@@ -110,4 +111,4 @@ const PatientDashboard = () => {
   );
 };
 
-export default withAuth(PatientDashboard);
+export default withAuth(PatientDashboard, 'patient'); // Wrapping the component with authentication HOC

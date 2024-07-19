@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabaseClient';
-import withAuth from '../../lib/auth';
+import { supabase } from '@/lib/supabaseClient';
+import withAuth from '@/lib/auth';
 
 type Patient = {
   patient_id: string;
@@ -156,4 +156,4 @@ const LinkPatient = () => {
   );
 };
 
-export default withAuth(LinkPatient);
+export default withAuth(LinkPatient, 'doctor');
