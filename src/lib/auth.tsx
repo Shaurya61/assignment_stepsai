@@ -1,4 +1,3 @@
-// lib/withAuth.tsx
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
@@ -9,7 +8,7 @@ interface User {
 }
 
 const withAuth = (WrappedComponent: React.ComponentType, role: 'doctor' | 'patient') => {
-  return (props: any) => {
+  const ComponentWithAuth = (props: any) => {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -43,7 +42,7 @@ const withAuth = (WrappedComponent: React.ComponentType, role: 'doctor' | 'patie
       };
 
       checkUser();
-    }, []);
+    }, [router]); // Include 'router' as a dependency
 
     if (loading) {
       return <div>Loading...</div>; 
@@ -51,6 +50,11 @@ const withAuth = (WrappedComponent: React.ComponentType, role: 'doctor' | 'patie
 
     return <WrappedComponent {...props} />;
   };
+
+  // Add a display name to the component
+  ComponentWithAuth.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+
+  return ComponentWithAuth;
 };
 
 export default withAuth;

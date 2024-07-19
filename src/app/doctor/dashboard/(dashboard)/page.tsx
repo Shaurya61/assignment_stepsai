@@ -33,7 +33,7 @@ const Dashboard = () => {
               <Link href="/doctor/dashboard/uploaded-pdf">
               
                 {/* Link to uploaded PDFs page */}
-                <span className="hover:text-gray-300">pdf Uploads</span>
+                <span className="hover:text-gray-300">Uploaded Pdfs</span>
                 {/* Text with hover effect */}
               </Link>
             </li>
