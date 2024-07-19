@@ -2,9 +2,11 @@
 "use client"
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 const Header = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -14,11 +16,11 @@ const Header = () => {
   const closeMenu = () => {
     setIsOpen(false);
   };
-  const handleSignOut = async () => {
+  const handleSignout = async () => {
     const { error } = await supabase.auth.signOut();
+    router.push('/');
     if (error) console.error("Signout error:", error);
   };
-
   return (
     <header className="bg-indigo-600 text-white p-4">
       <nav className="max-w-7xl mx-auto flex justify-between items-center">
@@ -48,7 +50,7 @@ const Header = () => {
             <Link href="/doctor/dashboard" className="block px-4 py-2 hover:underline">Dashboard</Link>
             <Link href="/doctor/dashboard/uploaded-pdf" className="block px-4 py-2 hover:underline">Uploaded PDFs</Link>
             <Link href="/doctor/dashboard/linked-patients" className="block px-4 py-2 hover:underline">All Linked Patients</Link>
-            <Link href="/" className="block px-4 py-2 hover:underline" onClick={handleSignOut}>Signout</Link> 
+            <span  className="block px-4 py-2 hover:underline" onClick={handleSignout}>Signout</span> 
           </div>
           <div className="flex-1" onClick={closeMenu}></div>
         </div>
