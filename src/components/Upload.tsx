@@ -7,6 +7,7 @@ import withAuth from "@/lib/auth";
 const Upload = () => {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleUpload = async () => {
     if (!file) {
@@ -55,10 +56,9 @@ const Upload = () => {
       console.error("Database insert error:", dbError);
     } else {
       console.log("File details inserted into database");
+      setSuccessMessage(`${file.name} uploaded successfully`);
     }
   };
-
-
 
   return (
     <div className="space-y-8">
@@ -83,9 +83,12 @@ const Upload = () => {
           >
             Upload
           </button>
-            <div>
-              </div>
         </div>
+        {successMessage && (
+          <div className="mt-4 text-green-600">
+            {successMessage}
+          </div>
+        )}
       </div>
     </div>
   );
