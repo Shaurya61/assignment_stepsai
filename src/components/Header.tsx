@@ -1,5 +1,6 @@
 // components/Header.tsx
 "use client"
+import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
@@ -12,6 +13,10 @@ const Header = () => {
 
   const closeMenu = () => {
     setIsOpen(false);
+  };
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error("Signout error:", error);
   };
 
   return (
@@ -43,7 +48,7 @@ const Header = () => {
             <Link href="/doctor/dashboard" className="block px-4 py-2 hover:underline">Dashboard</Link>
             <Link href="/doctor/dashboard/uploaded-pdf" className="block px-4 py-2 hover:underline">Uploaded PDFs</Link>
             <Link href="/doctor/dashboard/linked-patients" className="block px-4 py-2 hover:underline">All Linked Patients</Link>
-            <Link href="/" className="block px-4 py-2 hover:underline">Signout</Link>
+            <Link href="/" className="block px-4 py-2 hover:underline" onClick={handleSignOut}>Signout</Link>
           </div>
           <div className="flex-1" onClick={closeMenu}></div>
         </div>
