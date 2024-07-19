@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import withAuth from '@/lib/auth';
+import Link from 'next/link';
 import Header from "@/components/Header";
 
 interface Patient {

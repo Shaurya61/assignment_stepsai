@@ -24,26 +24,32 @@ const PatientDashboard = () => {
     const fetchLinkedDoctors = async () => {
       const user = (await supabase.auth.getUser()).data.user; // Getting the current user
       if (user) {
-        // Fetching the patient name
+        // Fetching the patient name and ID
         const { data: patientData } = await supabase
           .from("patients")
-          .select("name")
+          .select("patient_id, name")
           .eq("uid", user.id)
           .single();
-        setPatientName(patientData?.name || ""); // Setting the patient name
 
-        // Fetching the linked doctors for the patient
-        const { data: doctorPatientData } = await supabase
-          .from("doctorpatient")
-          .select("doctor_id");
+        if (patientData) {
+          setPatientName(patientData.name || ""); // Setting the patient name
 
-        if (doctorPatientData) {
-          const doctorIds = doctorPatientData.map((link) => link.doctor_id); // Extracting doctor IDs
-          const { data: doctorData } = await supabase
-            .from("doctors")
-            .select("*")
-            .in("doctor_id", doctorIds); // Fetching doctor details
-          setLinkedDoctors(doctorData || []); // Setting the state with doctors data
+          // Fetching the linked doctors for the patient
+          const { data: doctorPatientData, error } = await supabase
+            .from("doctorpatient")
+            .select("doctor_id")
+            .eq("patient_id", patientData.patient_id);
+
+          if (doctorPatientData) {
+            const doctorIds = doctorPatientData.map((link) => link.doctor_id); // Extracting doctor IDs
+            const { data: doctorData } = await supabase
+              .from("doctors")
+              .select("*")
+              .in("doctor_id", doctorIds); // Fetching doctor details
+            setLinkedDoctors(doctorData || []); // Setting the state with doctors data
+          } else {
+            console.error(error);
+          }
         }
       }
       setLoading(false); // Setting loading state to false once data is fetched
