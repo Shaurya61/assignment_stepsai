@@ -14,6 +14,7 @@ const Auth = () => {
   const [name, setName] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [isDoctor, setIsDoctor] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -50,8 +51,10 @@ const Auth = () => {
             await supabase.auth.signInWithPassword({ email, password });
           if (signInError) {
             console.error("Error signing in:", signInError);
+            setAuthError("Invalid Email and Password");
           } else {
             console.log("Successfully signed in:", signInData);
+            setAuthError(null); // Clear any previous error message
             if (doctorData && doctorData.length > 0) {
               console.log("Redirecting to doctor dashboard");
               router.push("/doctor/dashboard");
@@ -62,9 +65,11 @@ const Auth = () => {
           }
         } else {
           console.error("User not found in either doctor or patient tables.");
+          setAuthError("Invalid Email and Password");
         }
       } catch (error) {
         console.error("Unexpected error during login:", error);
+        setAuthError("Invalid Email and Password");
       }
     } else {
       try {
@@ -74,6 +79,7 @@ const Auth = () => {
           await supabase.auth.signUp({ email, password });
         if (signUpError) {
           console.error("Error signing up:", signUpError);
+          setAuthError("Invalid Email and Password");
         } else {
           const user = signUpData.user;
           if (user) {
@@ -115,9 +121,11 @@ const Auth = () => {
         }
       } catch (error) {
         console.error("Unexpected error during sign-up:", error);
+        setAuthError("Invalid Email and Password");
       }
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
@@ -206,6 +214,12 @@ const Auth = () => {
             />
           </LabelInputContainer>
 
+          {authError && (
+            <div className="text-red-600 mb-4">
+              {authError}
+            </div>
+          )}
+
           <button
             className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
             type="submit"
@@ -216,7 +230,10 @@ const Auth = () => {
 
           <div className="text-center mt-4">
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setAuthError(null); // Clear error message when switching between login and signup
+              }}
               type="button"
               className="text-indigo-600 hover:text-indigo-500"
             >
